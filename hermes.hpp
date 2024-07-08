@@ -83,6 +83,14 @@ public:
         this->streams.clear();
     }
 
+    void disableColor() {
+        this->color = false;
+    }
+
+    void enableColor() {
+        this->color = true;
+    }
+
     void setName(const std::string &newLogName) {
         this->logName = newLogName;
     }
