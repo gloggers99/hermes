@@ -1,5 +1,7 @@
 # Hermes
 A super quick easy logger for C++
+> [!INFO]
+> Im working on this project alongside my other project [GFX](https://github.com/gloggers99/gfx), features are being added by necessity for that project. This is also why commits may have the same messages from GFX.
 ## Features
 - [X] Cross Platform (Works on Windows/Linux/Mac)
 - [X] Multiple Outputs At Once
