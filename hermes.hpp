@@ -1,6 +1,7 @@
 #pragma once
 
-#include <utility>
+#include <iomanip>
+#include <format>
 #include <vector>
 #include <unordered_map>
 #include <ostream>
@@ -9,11 +10,13 @@
 #include <iostream>
 #if defined(__MINGW32__)
 #include <windows.h>
+#endif
 #include <fstream>
 #include <sstream>
 #include <variant>
+#include <codecvt>
+#include <locale>
 
-#endif
 
 namespace Hermes {
 
@@ -28,6 +31,7 @@ template<typename T = char>
 class Log {
 private:
     bool enabled;
+    std::string format;
 
     std::string logName;
     bool color;
@@ -68,7 +72,8 @@ private:
     // i might just make a toml parser in the future for fun
     void reloadConfig() {
         std::unordered_map<std::string, std::variant<std::string*, bool*>> configMap = {
-                {"enabled", &this->enabled}
+                {"enabled", &this->enabled},
+                {"format", &this->format}
         };
 
         std::ifstream config("./hermes.conf");
@@ -90,10 +95,17 @@ private:
                 if (pair.first == token) {
                     if (std::holds_alternative<bool*>(pair.second)) {
                         ss >> std::boolalpha >> *std::get<bool*>(pair.second);
+                    } else if (std::holds_alternative<std::string*>(pair.second)) {
+                        ss >> std::quoted(*std::get<std::string*>(pair.second));
                     }
                 }
             }
         }
+    }
+
+    std::wstring makeWide(const std::string& str) {
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        return converter.from_bytes(str);
     }
 
 public:
@@ -103,19 +115,22 @@ public:
         if (!this->enabled)
             return;
 
+        std::string colorString = this->color ? this->colorMap[level] : "";
+        std::string resetString = this->color ? "\033[0m" : "";
+
+        std::string tmpFormat = format;
+        if (tmpFormat.find("{logname}") != std::string::npos)
+            tmpFormat.replace(tmpFormat.find("{logname}"), sizeof("{logname}") - 1, this->logName);
+        tmpFormat.replace(tmpFormat.find("{loglevel}"), sizeof("{loglevel}") - 1, this->getStringFromLogLevel(level));
+        tmpFormat.replace(tmpFormat.find("{logmessage}"), sizeof("{logmessage}") - 1, msg);
+        tmpFormat = colorString + tmpFormat + resetString + "\n";
+
         std::for_each(this->streams.begin(),
                       this->streams.end(),
                       [&](std::reference_wrapper<std::basic_ostream<T>> stream) {
-            stream.get()
-            << (this->color ? this->colorMap[level] : "")
-            << "["
-            << this->logName << ": "
-            << getStringFromLogLevel(level)
-            << "] "
-            << msg
-            << (this->color ? "\033[0m" : "")
-            << "\n";
+                stream.get() << tmpFormat;
         });
+
     }
 
     void addStream(std::basic_ostream<T> &stream) {
