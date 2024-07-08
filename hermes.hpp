@@ -61,11 +61,15 @@ public:
         });
     }
 
+    void addStream(std::basic_ostream<T> &stream) {
+        this->streams.emplace_back(std::ref(stream));
+    }
+
     void setName(const std::string &newLogName) {
         this->logName = newLogName;
     }
 
-    void operator()(T *msg) {
+    void operator()(T *msg, LogLevel level = LogLevel::LOG_INFO) {
         this->log(msg);
     }
 
