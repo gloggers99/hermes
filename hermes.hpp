@@ -16,8 +16,9 @@ namespace Hermes {
 enum class LogLevel {
     LOG_INFO,
     LOG_WARN,
-    LOG_ERROR
+    LOG_ERROR,
 };
+
 
 template<typename T = char>
 class Log {
@@ -31,6 +32,17 @@ private:
             {LogLevel::LOG_WARN, "\033[33m"},
             {LogLevel::LOG_ERROR, "\033[31m"}
     };
+
+    std::string getStringFromLogLevel(LogLevel level) {
+        switch (level) {
+            case LogLevel::LOG_INFO:
+                return "INFO";
+            case LogLevel::LOG_WARN:
+                return "WARN";
+            case LogLevel::LOG_ERROR:
+                return "ERROR";
+        }
+    }
 
     void checkColor() {
 #if defined(__MINGW32__)
@@ -47,14 +59,16 @@ private:
     }
 
 public:
-    void log(T *msg, LogLevel level = LogLevel::LOG_INFO) {
+    void log(const T *msg, LogLevel level = LogLevel::LOG_INFO) {
         std::for_each(this->streams.begin(),
                       this->streams.end(),
                       [&](std::reference_wrapper<std::basic_ostream<T>> stream) {
             stream.get()
             << (this->color ? this->colorMap[level] : "")
             << "["
-            << this->logName << "] "
+            << this->logName << ": "
+            << getStringFromLogLevel(level)
+            << "] "
             << msg
             << (this->color ? "\033[0m" : "")
             << "\n";
@@ -65,12 +79,16 @@ public:
         this->streams.emplace_back(std::ref(stream));
     }
 
+    void clearStreams() {
+        this->streams.clear();
+    }
+
     void setName(const std::string &newLogName) {
         this->logName = newLogName;
     }
 
-    void operator()(T *msg, LogLevel level = LogLevel::LOG_INFO) {
-        this->log(msg);
+    void operator()(const T *msg, LogLevel level = LogLevel::LOG_INFO) {
+        this->log(msg, level);
     }
 
     Log() {
@@ -90,5 +108,6 @@ public:
     }
     ~Log() = default;
 };
+
 
 } // namespace Hermes
