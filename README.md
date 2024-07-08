@@ -4,8 +4,10 @@ A super quick easy logger for C++
 > Im working on this project alongside my other project [GFX](https://github.com/gloggers99/gfx), features are being added by necessity for that project. This is also why commits may have the same messages from GFX.
 ## Features
 - [X] Cross Platform (Works on Windows/Linux/Mac)
-- [X] Multiple Outputs At Once
+- [X] Multiple Outputs At Once (can write to ANYTHING that is a std::basic_ostream)
+- [X] Wide String's should work (std::wstring, wchar_t)
 - [X] Toggleable Multiplatform Colors
+- [X] One switch to completely hide logging output
 ## Quick Start
 Download the single header file in this project and place it in your project, then `#include <path/to/hermes.hpp>` inside your code!
 ### Usage
