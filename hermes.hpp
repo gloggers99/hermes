@@ -9,6 +9,10 @@
 #include <iostream>
 #if defined(__MINGW32__)
 #include <windows.h>
+#include <fstream>
+#include <sstream>
+#include <variant>
+
 #endif
 
 namespace Hermes {
@@ -23,6 +27,8 @@ enum class LogLevel {
 template<typename T = char>
 class Log {
 private:
+    bool enabled;
+
     std::string logName;
     bool color;
 
@@ -32,6 +38,7 @@ private:
             {LogLevel::LOG_WARN, "\033[33m"},
             {LogLevel::LOG_ERROR, "\033[31m"}
     };
+
 
     std::string getStringFromLogLevel(LogLevel level) {
         switch (level) {
@@ -58,8 +65,44 @@ private:
 #endif
     }
 
+    // i might just make a toml parser in the future for fun
+    void reloadConfig() {
+        std::unordered_map<std::string, std::variant<std::string*, bool*>> configMap = {
+                {"enabled", &this->enabled}
+        };
+
+        std::ifstream config("./hermes.conf");
+
+        // no config
+        if (!config.is_open())
+            return;
+
+        std::string line;
+        std::istringstream ss;
+        while (std::getline(config, line)) {
+            ss.clear();
+            ss.str(line);
+
+            std::string token, delimiter;
+            ss >> token >> delimiter;
+
+            for (auto &pair : configMap) {
+                if (pair.first == token) {
+                    if (std::holds_alternative<bool*>(pair.second)) {
+                        ss >> std::boolalpha >> *std::get<bool*>(pair.second);
+                    }
+                }
+            }
+        }
+    }
+
 public:
     void log(const T *msg, LogLevel level = LogLevel::LOG_INFO) {
+        this->reloadConfig();
+
+        if (!this->enabled)
+            return;
+
         std::for_each(this->streams.begin(),
                       this->streams.end(),
                       [&](std::reference_wrapper<std::basic_ostream<T>> stream) {
@@ -99,15 +142,15 @@ public:
         this->log(msg, level);
     }
 
-    Log() {
+    Log() : enabled(true) {
         this->checkColor();
     }
 
-    Log(std::string logName, std::basic_ostream<T> &out = std::cout) : logName(std::move(logName)), streams({std::ref(out)}) {
+    explicit Log(std::string logName, std::basic_ostream<T> &out = std::cout) : enabled(true), logName(std::move(logName)), streams({std::ref(out)}) {
         this->checkColor();
     }
 
-    Log(std::string logName, const std::vector<std::basic_ostream<T>> &outStreams) : logName(std::move(logName)) {
+    Log(std::string logName, const std::vector<std::basic_ostream<T>> &outStreams) : enabled(true), logName(std::move(logName)) {
         for (auto &stream : outStreams) {
             this->streams.emplace_back(std::ref(stream));
         }
