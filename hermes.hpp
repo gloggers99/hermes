@@ -73,7 +73,7 @@ public:
         this->checkColor();
     }
 
-    Log(std::string logName, std::basic_ostream<T> &out) : logName(std::move(logName)), streams({std::ref(out)}) {
+    Log(std::string logName, std::basic_ostream<T> &out = std::cout) : logName(std::move(logName)), streams({std::ref(out)}) {
         this->checkColor();
     }
 
