@@ -16,6 +16,7 @@
 #include <variant>
 #include <codecvt>
 #include <locale>
+#include <string>
 
 
 namespace Hermes {
@@ -118,11 +119,19 @@ public:
         std::string colorString = this->color ? this->colorMap[level] : "";
         std::string resetString = this->color ? "\033[0m" : "";
 
+        std::unordered_map<std::string, std::string> formatMap = {
+                {"logname", this->logName},
+                {"loglevel", this->getStringFromLogLevel(level)},
+                {"logmessage", msg}
+        };
+
         std::string tmpFormat = format;
-        if (tmpFormat.find("{logname}") != std::string::npos)
-            tmpFormat.replace(tmpFormat.find("{logname}"), sizeof("{logname}") - 1, this->logName);
-        tmpFormat.replace(tmpFormat.find("{loglevel}"), sizeof("{loglevel}") - 1, this->getStringFromLogLevel(level));
-        tmpFormat.replace(tmpFormat.find("{logmessage}"), sizeof("{logmessage}") - 1, msg);
+        std::for_each(formatMap.begin(), formatMap.end(), [&](const std::pair<std::string, std::string>& pair) {
+            std::string token = "{" + pair.first + "}";
+            if (tmpFormat.find(token) != std::string::npos)
+                tmpFormat.replace(tmpFormat.find(token), token.length(), pair.second);
+        });
+
         tmpFormat = colorString + tmpFormat + resetString + "\n";
 
         std::for_each(this->streams.begin(),

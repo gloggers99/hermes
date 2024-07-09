@@ -5,9 +5,9 @@ A super quick easy logger for C++
 ## Features
 - [X] Cross Platform (Works on Windows/Linux/Mac)
 - [X] Multiple Outputs At Once (can write to ANYTHING that is a std::basic_ostream)
-- [X] Wide String's should work (std::wstring, wchar_t)
 - [X] Toggleable Multiplatform Colors
-- [X] One switch to completely hide logging output
+- [X] Simple reloadable config file
+- [X] Customizable format
 ## Quick Start
 Download the single header file in this project and place it in your project, then `#include <path/to/hermes.hpp>` inside your code!
 ### Usage
@@ -48,4 +48,9 @@ int main() {
     return 0;
 }
 ```
-
+## Config File
+In your runtime directory add a file named `hermes.conf`
+```toml
+enabled = true
+format = "[{logname}: {loglevel}] {logmessage}"
+```
