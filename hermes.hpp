@@ -27,7 +27,6 @@ enum class LogLevel {
     LOG_ERROR,
 };
 
-
 template<typename T = char>
 class Log {
 private:
