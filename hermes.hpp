@@ -1,3 +1,7 @@
+/*
+ * Hermes logger by gloggers99
+ */
+
 #pragma once
 
 #include <iomanip>
