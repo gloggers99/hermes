@@ -106,13 +106,8 @@ private:
         }
     }
 
-    std::wstring makeWide(const std::string& str) {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        return converter.from_bytes(str);
-    }
-
 public:
-    void log(const T *msg, LogLevel level = LogLevel::LOG_INFO) {
+    void log(const std::basic_string<T> &msg, LogLevel level = LogLevel::LOG_INFO) {
         this->reloadConfig();
 
         if (!this->enabled)
@@ -164,7 +159,7 @@ public:
         this->logName = newLogName;
     }
 
-    void operator()(const T *msg, LogLevel level = LogLevel::LOG_INFO) {
+    void operator()(const std::basic_string<T> msg, LogLevel level = LogLevel::LOG_INFO) {
         this->log(msg, level);
     }
 
