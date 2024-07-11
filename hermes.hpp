@@ -54,6 +54,8 @@ private:
             case LogLevel::LOG_ERROR:
                 return "ERROR";
         }
+
+        throw std::runtime_error("Invalid LogLevel.");
     }
 
     void checkColor() {
