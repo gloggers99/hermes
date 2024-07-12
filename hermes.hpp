@@ -11,13 +11,13 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#if defined(__MINGW32__)
-#include <windows.h>
-#endif
 #include <fstream>
 #include <sstream>
 #include <variant>
 #include <string>
+#if defined(__MINGW32__)
+#include <windows.h>
+#endif
 
 
 namespace Hermes {
